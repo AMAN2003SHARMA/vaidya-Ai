@@ -1,0 +1,5 @@
+{
+  "name": "VaidyaAI - Indian Medical AI Assistant",
+  "description": "A comprehensive medical AI application for diagnostic analysis, doctor recommendations, and health assistance.",
+  "requestFramePermissions": ["camera", "geolocation"]
+}

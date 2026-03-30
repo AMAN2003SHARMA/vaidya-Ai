@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user-specific metadata and preferences.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "twoFactorEnabled": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "DiagnosticResult": {
+      "title": "Diagnostic Result",
+      "description": "Stores the results of an AI medical analysis.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User UID who owns this record" },
+        "type": { "type": "string", "enum": ["Skin", "Eyes", "Teeth"] },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "predictedDisease": { "type": "string" },
+        "severityPercentage": { "type": "number" },
+        "precautions": { "type": "array", "items": { "type": "string" } },
+        "causes": { "type": "array", "items": { "type": "string" } },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "type", "imageUrl", "predictedDisease", "severityPercentage", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile documents"
+    },
+    "/diagnostics/{diagnosticId}": {
+      "schema": "DiagnosticResult",
+      "description": "Diagnostic analysis records"
+    }
+  }
+}
