@@ -78,7 +78,13 @@ export default function Auth() {
         }
       }
     } catch (err: any) {
-      setError(err.message);
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Domain Not Authorized: Please add "vaidyaaibyamk17.netlify.app" to Authorized Domains in your Firebase Console (Authentication > Settings).');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('Sign-in Disabled: Please enable Email/Password in your Firebase Console (Authentication > Sign-in method).');
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -104,7 +110,13 @@ export default function Auth() {
         handleFirestoreError(err, OperationType.WRITE, userPath);
       }
     } catch (err: any) {
-      setError(err.message);
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Domain Not Authorized: Please add "vaidyaaibyamk17.netlify.app" to Authorized Domains in your Firebase Console (Authentication > Settings).');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('Sign-in Disabled: Please enable Google in your Firebase Console (Authentication > Sign-in method).');
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }

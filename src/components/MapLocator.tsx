@@ -1,59 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Navigation, Phone, Star, Clock, ExternalLink } from 'lucide-react';
-import { motion } from 'framer-motion';
-
-// Mock data for nearby doctors since Google Maps API requires billing/key
-const MOCK_DOCTORS = [
-  {
-    id: 1,
-    name: "Dr. Rajesh Sharma",
-    specialty: "Dermatologist",
-    address: "12, MG Road, Bangalore",
-    rating: 4.8,
-    reviews: 124,
-    phone: "+91 98765 43210",
-    distance: "1.2 km",
-    open: "Open until 8:00 PM"
-  },
-  {
-    id: 2,
-    name: "Apollo Medical Center",
-    specialty: "Multi-Specialty Clinic",
-    address: "45, Indiranagar, Bangalore",
-    rating: 4.5,
-    reviews: 850,
-    phone: "+91 80 2345 6789",
-    distance: "2.5 km",
-    open: "Open 24/7"
-  },
-  {
-    id: 3,
-    name: "Dr. Priya Iyer",
-    specialty: "Ophthalmologist",
-    address: "78, Koramangala, Bangalore",
-    rating: 4.9,
-    reviews: 98,
-    phone: "+91 91234 56789",
-    distance: "3.1 km",
-    open: "Open until 6:30 PM"
-  },
-  {
-    id: 4,
-    name: "Smile Dental Clinic",
-    specialty: "Dentist",
-    address: "22, Jayanagar, Bangalore",
-    rating: 4.7,
-    reviews: 215,
-    phone: "+91 80 4567 8901",
-    distance: "0.8 km",
-    open: "Open until 7:00 PM"
-  }
-];
+import { MapPin, Navigation, Phone, Star, Clock, ExternalLink, Search, Filter } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ALL_INDIA_DOCTORS } from '../constants';
 
 export default function MapLocator() {
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCity, setSelectedCity] = useState('All');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('All');
+
+  const cities = ['All', ...Array.from(new Set(ALL_INDIA_DOCTORS.map(d => d.city)))];
+  const specialties = ['All', ...Array.from(new Set(ALL_INDIA_DOCTORS.map(d => d.specialty)))];
+
+  const filteredDoctors = ALL_INDIA_DOCTORS.filter(doc => {
+    const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         doc.address.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCity = selectedCity === 'All' || doc.city === selectedCity;
+    const matchesSpecialty = selectedSpecialty === 'All' || doc.specialty === selectedSpecialty;
+    return matchesSearch && matchesCity && matchesSpecialty;
+  });
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -97,6 +64,39 @@ export default function MapLocator() {
         </div>
       )}
 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+        <div className="relative lg:col-span-2">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search doctors or clinics..."
+            className="w-full pl-12 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <MapPin className="text-gray-400 w-5 h-5 shrink-0" />
+          <select 
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm"
+          >
+            {cities.map(city => <option key={city} value={city}>{city}</option>)}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="text-gray-400 w-5 h-5 shrink-0" />
+          <select 
+            value={selectedSpecialty}
+            onChange={(e) => setSelectedSpecialty(e.target.value)}
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2 px-3 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm"
+          >
+            {specialties.map(spec => <option key={spec} value={spec}>{spec}</option>)}
+          </select>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Map Placeholder */}
         <div className="lg:col-span-2 bg-gray-200 rounded-3xl overflow-hidden relative min-h-[400px] shadow-inner border border-gray-300">
@@ -134,15 +134,20 @@ export default function MapLocator() {
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             Nearby Specialists
-            <span className="text-xs font-normal text-gray-400">({MOCK_DOCTORS.length} results)</span>
+            <span className="text-xs font-normal text-gray-400">({filteredDoctors.length} results)</span>
           </h2>
           <div className="space-y-4 overflow-y-auto max-h-[600px] pr-2">
-            {MOCK_DOCTORS.map((doc) => (
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                key={doc.id}
-                className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-indigo-200 transition-all group"
-              >
+            <AnimatePresence>
+              {filteredDoctors.map((doc) => (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  whileHover={{ scale: 1.02 }}
+                  key={doc.id}
+                  className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-indigo-200 transition-all group"
+                >
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{doc.name}</h3>
@@ -187,6 +192,7 @@ export default function MapLocator() {
                 </div>
               </motion.div>
             ))}
+            </AnimatePresence>
           </div>
         </div>
       </div>
