@@ -15,6 +15,7 @@ import Dashboard from './components/Dashboard';
 import History from './components/History';
 import MapLocator from './components/MapLocator';
 import Chatbot from './components/Chatbot';
+import Profile from './components/Profile';
 import { 
   LayoutDashboard, 
   History as HistoryIcon, 
@@ -22,7 +23,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  Stethoscope
+  Stethoscope,
+  User as UserIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -34,6 +36,7 @@ const Navbar = ({ user }: { user: User | null }) => {
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'History', path: '/history', icon: HistoryIcon },
     { name: 'Find Doctors', path: '/map', icon: MapPin },
+    { name: 'Profile', path: '/profile', icon: UserIcon },
   ];
 
   if (!user) return null;
@@ -185,6 +188,10 @@ export default function App() {
               <Route 
                 path="/map" 
                 element={user ? <MapLocator /> : <Navigate to="/auth" />} 
+              />
+              <Route 
+                path="/profile" 
+                element={user ? <Profile /> : <Navigate to="/auth" />} 
               />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>

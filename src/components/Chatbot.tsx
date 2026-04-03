@@ -49,7 +49,11 @@ export default function Chatbot() {
     setLoading(true);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error('Gemini API Key is missing. Please set GEMINI_API_KEY in your environment variables.');
+      }
+      const ai = new GoogleGenAI({ apiKey });
       const chat = ai.chats.create({
         model: 'gemini-3-flash-preview',
         config: {
@@ -69,11 +73,11 @@ export default function Chatbot() {
         timestamp: new Date() 
       };
       setMessages(prev => [...prev, botMsg]);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setMessages(prev => [...prev, { 
         role: 'bot', 
-        text: "I'm sorry, I'm having trouble connecting. Please try again later.", 
+        text: `I'm sorry, I'm having trouble connecting: ${err.message || "Please try again later."}`, 
         timestamp: new Date() 
       }]);
     } finally {

@@ -87,7 +87,11 @@ export default function Dashboard() {
     setError('');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error('Gemini API Key is missing. Please set GEMINI_API_KEY in your environment variables.');
+      }
+      const ai = new GoogleGenAI({ apiKey });
       const base64Data = image.split(',')[1];
       const model = 'gemini-3-flash-preview';
       
@@ -108,27 +112,35 @@ export default function Dashboard() {
               
               Return a JSON object with: predicted_disease (string), severity_percentage (number 0-100), precautions (array of strings), and causes (array of strings). 
               
-              Be professional, accurate, and cross-reference with live medical research using Google Search.`
+              Be professional, accurate, and cross-reference with live medical research using Google Search.
+              
+              IMPORTANT: Return ONLY the JSON object, no other text.`
             }
           ]
         },
         config: {
-          responseMimeType: 'application/json',
-          tools: [{ googleSearch: {} }],
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              predicted_disease: { type: Type.STRING },
-              severity_percentage: { type: Type.NUMBER },
-              precautions: { type: Type.ARRAY, items: { type: Type.STRING } },
-              causes: { type: Type.ARRAY, items: { type: Type.STRING } }
-            },
-            required: ['predicted_disease', 'severity_percentage', 'precautions', 'causes']
-          }
+          // We'll parse manually to be more robust, as grounding can sometimes add text
+          tools: [{ googleSearch: {} }]
         }
       });
 
-      const analysis = JSON.parse(response.text) as AnalysisResult;
+      const text = response.text || '';
+      let analysis: AnalysisResult;
+      
+      try {
+        // Try to find JSON in the response text if it's not pure JSON
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? jsonMatch[0] : text;
+        analysis = JSON.parse(jsonStr) as AnalysisResult;
+      } catch (parseErr) {
+        console.error('Failed to parse AI response:', text);
+        throw new Error('The AI model returned an invalid response format. Please try again.');
+      }
+
+      if (!analysis.predicted_disease) {
+        throw new Error('The AI model could not identify a condition. Please provide a clearer image.');
+      }
+
       setResult(analysis);
 
       // Save to Firestore

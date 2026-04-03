@@ -10,8 +10,18 @@ import {
   Filter,
   FileText,
   Clock,
-  ArrowUpRight
+  ArrowUpRight,
+  TrendingUp
 } from 'lucide-react';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from 'recharts';
 
 enum OperationType {
   CREATE = 'create',
@@ -94,6 +104,13 @@ export default function History() {
     return matchesSearch && matchesFilter;
   });
 
+  const trendData = [...records]
+    .sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis())
+    .map(r => ({
+      date: r.timestamp.toDate().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
+      severity: r.severityPercentage
+    }));
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -109,6 +126,65 @@ export default function History() {
         <h1 className="text-3xl font-bold text-gray-900">Patient History</h1>
         <p className="text-gray-500">View and manage your past AI diagnostic results</p>
       </div>
+
+      {records.length > 1 && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Severity Trend</h2>
+                <p className="text-xs text-gray-400 font-medium">Tracking your diagnostic patterns over time</p>
+              </div>
+            </div>
+          </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trendData}>
+                <defs>
+                  <linearGradient id="colorSeverity" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="date" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }}
+                  dy={10}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 600 }}
+                  domain={[0, 100]}
+                />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  itemStyle={{ fontSize: '12px', fontWeight: 'bold', color: '#6366f1' }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="severity" 
+                  stroke="#6366f1" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorSeverity)" 
+                  animationDuration={1500}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+      )}
 
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
         <div className="relative w-full md:w-96">
@@ -169,10 +245,20 @@ export default function History() {
                       </span>
                     </div>
                     <h3 className="font-bold text-gray-900 truncate">{record.predictedDisease}</h3>
-                    <div className="flex items-center gap-4 mt-1">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                        <span className="text-xs text-gray-500 font-medium">{record.severityPercentage}% Severity</span>
+                    <div className="mt-2 space-y-1">
+                      <div className="flex items-center justify-between text-[10px] font-bold uppercase text-gray-400">
+                        <span>Severity</span>
+                        <span>{record.severityPercentage}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${record.severityPercentage}%` }}
+                          className={`h-full rounded-full ${
+                            record.severityPercentage > 70 ? 'bg-red-500' : 
+                            record.severityPercentage > 40 ? 'bg-amber-500' : 'bg-green-500'
+                          }`}
+                        />
                       </div>
                     </div>
                   </div>
