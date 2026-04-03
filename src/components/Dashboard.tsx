@@ -13,7 +13,7 @@ import {
   Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { SYSTEM_PROMPT_ENHANCEMENT } from '../constants';
 
 enum OperationType {
@@ -252,66 +252,37 @@ export default function Dashboard() {
               exit={{ opacity: 0, x: -20 }}
               className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 space-y-8"
             >
-              <div className="flex flex-col md:flex-row items-center gap-8 p-6 bg-gray-50 rounded-3xl border border-gray-100">
-                <div className="w-48 h-48 relative shrink-0">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Analysis Complete
+                  </span>
+                  <h2 className="text-4xl font-black text-gray-900 tracking-tight">
+                    {result.predicted_disease}
+                  </h2>
+                </div>
+                <div className="w-32 h-32 relative">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Tooltip 
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        itemStyle={{ fontSize: '12px', fontWeight: 'bold' }}
-                      />
-                      <Legend 
-                        verticalAlign="bottom" 
-                        height={36} 
-                        iconType="circle"
-                        formatter={(value) => <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{value}</span>}
-                      />
                       <Pie
                         data={chartData}
-                        innerRadius={60}
-                        outerRadius={80}
-                        paddingAngle={8}
+                        innerRadius={35}
+                        outerRadius={50}
+                        paddingAngle={5}
                         dataKey="value"
-                        nameKey="name"
                         startAngle={90}
                         endAngle={-270}
-                        stroke="none"
                       >
                         {chartData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={index === 0 ? (result.severity_percentage > 70 ? '#ef4444' : result.severity_percentage > 40 ? '#f59e0b' : '#10b981') : '#e2e8f0'} 
-                          />
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-black text-gray-900">{result.severity_percentage}%</span>
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Severity</span>
-                  </div>
-                </div>
-
-                <div className="flex-grow space-y-4">
-                  <div>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold uppercase tracking-wider mb-3">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Analysis Complete
-                    </span>
-                    <h2 className="text-4xl font-black text-gray-900 tracking-tight">
-                      {result.predicted_disease}
-                    </h2>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${result.severity_percentage > 70 ? 'bg-red-500' : result.severity_percentage > 40 ? 'bg-amber-500' : 'bg-green-500'}`}></div>
-                      <span className="text-sm font-bold text-gray-700">
-                        {result.severity_percentage > 70 ? 'Critical Risk' : result.severity_percentage > 40 ? 'Moderate Risk' : 'Low Risk'}
-                      </span>
-                    </div>
-                    <div className="h-4 w-px bg-gray-200"></div>
-                    <p className="text-xs text-gray-500 font-medium">Based on AI Visual Patterns</p>
+                    <span className="text-xl font-bold text-gray-900">{result.severity_percentage}%</span>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase">Severity</span>
                   </div>
                 </div>
               </div>

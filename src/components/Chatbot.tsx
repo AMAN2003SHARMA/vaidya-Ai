@@ -32,12 +32,6 @@ export default function Chatbot() {
     }
   ]);
   const [loading, setLoading] = useState(false);
-  const [suggestions] = useState([
-    "I have a skin rash, what should I do?",
-    "Find a dentist in Delhi",
-    "Symptoms of Conjunctivitis",
-    "How to maintain oral hygiene?"
-  ]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,39 +51,29 @@ export default function Chatbot() {
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
       const chat = ai.chats.create({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-3-flash-preview',
         config: {
           systemInstruction: `You are 'Indian Medical', a helpful, culturally aware medical AI assistant. 
+          
           ${SYSTEM_PROMPT_ENHANCEMENT}
+          
           Provide general health advice, but always remind users to consult a real doctor. Use a mix of English and common Indian health terms where appropriate. Keep responses concise and structured. Use Google Search to verify any medical claims or find live research.`,
           tools: [{ googleSearch: {} }]
-        },
-        history: messages.map(m => ({
-          role: m.role === 'user' ? 'user' : 'model',
-          parts: [{ text: m.text }]
-        }))
+        }
       });
 
       const result = await chat.sendMessage({ message: input });
       const botMsg: Message = { 
         role: 'bot', 
-        text: result.text || "I'm sorry, I couldn't process that. Please try again.", 
+        text: result.text, 
         timestamp: new Date() 
       };
       setMessages(prev => [...prev, botMsg]);
-    } catch (err: any) {
-      console.error('Chat Error:', err);
-      let errorText = "I'm sorry, I'm having trouble connecting. Please try again later.";
-      
-      if (err.message?.includes('API_KEY_INVALID')) {
-        errorText = "Invalid API Key. Please check the configuration.";
-      } else if (err.message?.includes('SAFETY')) {
-        errorText = "I cannot answer that due to safety guidelines. Please ask a medical-related question.";
-      }
-      
+    } catch (err) {
+      console.error(err);
       setMessages(prev => [...prev, { 
         role: 'bot', 
-        text: errorText, 
+        text: "I'm sorry, I'm having trouble connecting. Please try again later.", 
         timestamp: new Date() 
       }]);
     } finally {
@@ -167,19 +151,6 @@ export default function Chatbot() {
                   ref={scrollRef}
                   className="flex-grow overflow-y-auto p-4 space-y-4 bg-gray-50/50"
                 >
-                  {messages.length === 1 && (
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                      {suggestions.map((s, i) => (
-                        <button
-                          key={i}
-                          onClick={() => { setInput(s); }}
-                          className="p-2 bg-white border border-gray-200 rounded-xl text-[10px] text-gray-600 hover:border-indigo-500 hover:text-indigo-600 transition-all text-left"
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  )}
                   {messages.map((msg, i) => (
                     <div 
                       key={i} 
