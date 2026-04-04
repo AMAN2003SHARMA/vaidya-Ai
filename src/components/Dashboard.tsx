@@ -93,7 +93,7 @@ export default function Dashboard() {
       }
       const ai = new GoogleGenAI({ apiKey });
       const base64Data = image.split(',')[1];
-      const model = 'gemini-3-flash-preview';
+      const model = 'gemini-3.1-pro-preview';
       
       const response = await ai.models.generateContent({
         model,
@@ -119,8 +119,18 @@ export default function Dashboard() {
           ]
         },
         config: {
-          // We'll parse manually to be more robust, as grounding can sometimes add text
-          tools: [{ googleSearch: {} }]
+          responseMimeType: 'application/json',
+          tools: [{ googleSearch: {} }],
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              predicted_disease: { type: Type.STRING },
+              severity_percentage: { type: Type.NUMBER },
+              precautions: { type: Type.ARRAY, items: { type: Type.STRING } },
+              causes: { type: Type.ARRAY, items: { type: Type.STRING } }
+            },
+            required: ['predicted_disease', 'severity_percentage', 'precautions', 'causes']
+          }
         }
       });
 
@@ -236,7 +246,7 @@ export default function Dashboard() {
             {loading ? (
               <>
                 <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                Analyzing with Gemini AI...
+                Analyzing with Vaidya AI...
               </>
             ) : (
               <>

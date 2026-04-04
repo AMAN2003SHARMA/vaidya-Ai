@@ -55,7 +55,7 @@ export default function Chatbot() {
       }
       const ai = new GoogleGenAI({ apiKey });
       const chat = ai.chats.create({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.1-pro-preview',
         config: {
           systemInstruction: `You are 'Indian Medical', a helpful, culturally aware medical AI assistant. 
           
