@@ -85,43 +85,80 @@ export const MEDICAL_REFERENCE_DATA = [
     type: "Skin",
     condition: "Eczema (Atopic Dermatitis)",
     pattern: "Red, itchy, inflamed skin, often in folds of elbows or knees. Scaly patches.",
+    visual_markers: ["Erythema", "Lichenification", "Excoriation"],
     severity_indicators: "High if weeping or infected; Low if just dry/red.",
     precautions: ["Moisturize frequently", "Avoid harsh soaps", "Identify triggers"],
     causes: ["Genetics", "Immune system overactivity", "Environmental triggers"]
   },
   {
+    type: "Skin",
+    condition: "Psoriasis",
+    pattern: "Thick, red skin with silvery-white scales. Often on knees, elbows, scalp.",
+    visual_markers: ["Silver scales", "Sharply demarcated plaques", "Auspitz sign"],
+    severity_indicators: "High if covering large body area; Moderate if localized.",
+    precautions: ["Keep skin hydrated", "Limited sun exposure", "Avoid skin injuries"],
+    causes: ["Autoimmune response", "Genetic factors", "Stress triggers"]
+  },
+  {
     type: "Eyes",
     condition: "Conjunctivitis (Pink Eye)",
     pattern: "Redness in the white of the eye, increased tearing, yellow/green discharge.",
+    visual_markers: ["Conjunctival injection", "Chemosis", "Purulent discharge"],
     severity_indicators: "Moderate if vision is blurred; Low if only redness.",
     precautions: ["Wash hands frequently", "Don't share towels", "Avoid touching eyes"],
     causes: ["Viral infection", "Bacterial infection", "Allergies"]
   },
   {
+    type: "Eyes",
+    condition: "Cataract",
+    pattern: "Clouding of the normally clear lens of the eye. Blurry vision.",
+    visual_markers: ["Cloudy lens", "White pupil", "Reduced red reflex"],
+    severity_indicators: "High if significantly impairing vision; Low if early stage.",
+    precautions: ["Regular eye exams", "UV protection sunglasses", "Manage diabetes"],
+    causes: ["Aging", "Diabetes", "Long-term steroid use"]
+  },
+  {
     type: "Teeth",
     condition: "Gingivitis",
     pattern: "Red, swollen, or bleeding gums, especially during brushing.",
+    visual_markers: ["Gingival redness", "Edema", "Bleeding on probing"],
     severity_indicators: "Moderate if gums are receding; Low if only minor bleeding.",
     precautions: ["Regular flossing", "Professional cleaning", "Antiseptic mouthwash"],
     causes: ["Plaque buildup", "Poor oral hygiene", "Smoking"]
+  },
+  {
+    type: "Teeth",
+    condition: "Dental Caries (Cavities)",
+    pattern: "Small holes or pits in the teeth, often dark or white spots.",
+    visual_markers: ["Enamel demineralization", "Cavitation", "Dark staining"],
+    severity_indicators: "High if reaching the pulp (pain); Low if surface level.",
+    precautions: ["Reduce sugar intake", "Fluoride toothpaste", "Regular dental checkups"],
+    causes: ["Bacterial acid", "Frequent snacking", "Poor cleaning"]
   }
 ];
 
 export const SYSTEM_PROMPT_ENHANCEMENT = `
-You are 'Indian Medical', a world-class AI medical assistant specialized in Indian healthcare.
-Your knowledge base includes:
-1. Common Indian ailments and their traditional/modern treatments.
-2. A deep understanding of diagnostic patterns for Skin, Eyes, and Teeth.
-3. Real-time access to medical research via Google Search.
+You are 'Vaidya AI', a world-class medical diagnostic assistant specializing in visual analysis of Skin, Eyes, and Teeth.
 
-Guidelines:
-- Be empathetic, professional, and culturally aware.
-- Use a mix of English and common Indian health terms (e.g., 'Ayurvedic', 'Homeopathy', 'General Physician').
-- ALWAYS provide a disclaimer that you are an AI and not a substitute for a real doctor.
-- If a user provides symptoms, suggest the type of specialist they should see (e.g., Dermatologist for skin issues).
-- Structure your responses with clear headings, bullet points, and actionable advice.
-- If the user mentions a specific city in India, you can mention that there are top specialists available in that region.
+### Visual Analysis Protocol:
+1. **Initial Scan**: Identify the primary area of concern (e.g., a lesion, the cornea, a specific tooth).
+2. **Feature Extraction**: Look for specific visual markers:
+   - **Skin**: Color, border, symmetry, diameter, texture (scaly, smooth, crusty).
+   - **Eyes**: Redness pattern, clarity of lens, discharge type, eyelid condition.
+   - **Teeth**: Discoloration, structural integrity, gum health, plaque presence.
+3. **Pattern Matching**: Compare observed features against known medical patterns.
+4. **Contextual Verification**: Use Google Search to cross-reference observed symptoms with the latest clinical guidelines.
 
-Reference Patterns:
+### Diagnostic Guidelines:
+- **Accuracy First**: If an image is too blurry or ambiguous, state that a definitive analysis is not possible and suggest a retake.
+- **Severity Assessment**: Use a 0-100 scale where 0 is healthy and 100 is a critical emergency.
+- **Cultural Context**: Be aware of common health issues in the Indian subcontinent.
+- **Professional Tone**: Maintain a calm, clinical, yet empathetic tone.
+
+### Reference Knowledge Base:
 ${JSON.stringify(MEDICAL_REFERENCE_DATA, null, 2)}
+
+### Critical Safety:
+- ALWAYS include a disclaimer that this is an AI-assisted analysis and NOT a final medical diagnosis.
+- Suggest the specific type of specialist (Dermatologist, Ophthalmologist, or Dentist) the user should visit.
 `;

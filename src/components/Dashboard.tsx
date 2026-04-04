@@ -10,7 +10,8 @@ import {
   CheckCircle2, 
   Activity,
   ChevronRight,
-  Info
+  Info,
+  Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
@@ -51,6 +52,8 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 interface AnalysisResult {
   predicted_disease: string;
   severity_percentage: number;
+  confidence_score: number;
+  visual_markers: string[];
   precautions: string[];
   causes: string[];
 }
@@ -110,7 +113,7 @@ export default function Dashboard() {
               
               ${SYSTEM_PROMPT_ENHANCEMENT}
               
-              Return a JSON object with: predicted_disease (string), severity_percentage (number 0-100), precautions (array of strings), and causes (array of strings). 
+              Return a JSON object with: predicted_disease (string), severity_percentage (number 0-100), confidence_score (number 0-100), visual_markers (array of strings), precautions (array of strings), and causes (array of strings). 
               
               Be professional, accurate, and cross-reference with live medical research using Google Search.
               
@@ -126,10 +129,12 @@ export default function Dashboard() {
             properties: {
               predicted_disease: { type: Type.STRING },
               severity_percentage: { type: Type.NUMBER },
+              confidence_score: { type: Type.NUMBER },
+              visual_markers: { type: Type.ARRAY, items: { type: Type.STRING } },
               precautions: { type: Type.ARRAY, items: { type: Type.STRING } },
               causes: { type: Type.ARRAY, items: { type: Type.STRING } }
             },
-            required: ['predicted_disease', 'severity_percentage', 'precautions', 'causes']
+            required: ['predicted_disease', 'severity_percentage', 'confidence_score', 'visual_markers', 'precautions', 'causes']
           }
         }
       });
@@ -163,6 +168,8 @@ export default function Dashboard() {
             imageUrl: image, // In real app, upload to Storage first
             predictedDisease: analysis.predicted_disease,
             severityPercentage: analysis.severity_percentage,
+            confidenceScore: analysis.confidence_score,
+            visualMarkers: analysis.visual_markers,
             precautions: analysis.precautions,
             causes: analysis.causes,
             timestamp: serverTimestamp()
@@ -283,6 +290,12 @@ export default function Dashboard() {
                   <h2 className="text-4xl font-black text-gray-900 tracking-tight">
                     {result.predicted_disease}
                   </h2>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center gap-1 text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">
+                      <Sparkles className="w-3 h-3" />
+                      Confidence: {result.confidence_score}%
+                    </div>
+                  </div>
                 </div>
                 <div className="w-32 h-32 relative">
                   <ResponsiveContainer width="100%" height="100%">
@@ -309,7 +322,20 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-4">
+                  <h3 className="flex items-center gap-2 font-bold text-gray-900">
+                    <Activity className="w-5 h-5 text-indigo-500" />
+                    Visual Markers
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {result.visual_markers.map((marker, i) => (
+                      <span key={i} className="px-2 py-1 bg-gray-100 text-gray-700 text-[10px] font-bold rounded-md border border-gray-200">
+                        {marker}
+                      </span>
+                    ))}
+                  </div>
+                </div>
                 <div className="space-y-4">
                   <h3 className="flex items-center gap-2 font-bold text-gray-900">
                     <AlertCircle className="w-5 h-5 text-amber-500" />
