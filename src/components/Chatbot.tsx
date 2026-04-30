@@ -55,7 +55,7 @@ export default function Chatbot() {
       }
       const ai = new GoogleGenAI({ apiKey });
       const chat = ai.chats.create({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-1.5-flash',
         config: {
           systemInstruction: `You are 'Indian Medical', a helpful, culturally aware medical AI assistant. 
           
@@ -75,9 +75,16 @@ export default function Chatbot() {
       setMessages(prev => [...prev, botMsg]);
     } catch (err: any) {
       console.error(err);
+      let errorMessage = err.message || "Please try again later.";
+      
+      // Handle quota/rate limit errors gracefully
+      if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED')) {
+        errorMessage = "I'm currently receiving too many requests. Please wait a moment or check back later! Our daily AI quota is currently being heavily used.";
+      }
+
       setMessages(prev => [...prev, { 
         role: 'bot', 
-        text: `I'm sorry, I'm having trouble connecting: ${err.message || "Please try again later."}`, 
+        text: `I'm sorry, I'm having trouble connecting: ${errorMessage}`, 
         timestamp: new Date() 
       }]);
     } finally {
