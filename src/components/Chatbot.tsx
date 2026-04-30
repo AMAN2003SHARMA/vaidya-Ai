@@ -55,7 +55,7 @@ export default function Chatbot() {
       }
       const ai = new GoogleGenAI({ apiKey });
       const chat = ai.chats.create({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-3-flash-preview',
         config: {
           systemInstruction: `You are 'Indian Medical', a helpful, culturally aware medical AI assistant. 
           
@@ -69,7 +69,7 @@ export default function Chatbot() {
       const result = await chat.sendMessage({ message: input });
       const botMsg: Message = { 
         role: 'bot', 
-        text: result.text, 
+        text: result.text || 'I apologize, but I could not generate a response. Please try again.', 
         timestamp: new Date() 
       };
       setMessages(prev => [...prev, botMsg]);

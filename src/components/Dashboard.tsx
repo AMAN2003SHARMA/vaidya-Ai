@@ -98,26 +98,23 @@ export default function Dashboard() {
       }
       const ai = new GoogleGenAI({ apiKey });
       const base64Data = image.split(',')[1];
-      const model = 'gemini-2.0-flash';
+      const model = 'gemini-3-flash-preview';
       
       const response = await ai.models.generateContent({
         model,
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              {
-                inlineData: {
-                  mimeType: 'image/jpeg',
-                  data: base64Data
-                }
-              },
-              {
-                text: `Analyze this medical image of ${type} using your visual diagnostic capabilities.`
+        contents: {
+          parts: [
+            {
+              inlineData: {
+                mimeType: 'image/jpeg',
+                data: base64Data
               }
-            ]
-          }
-        ],
+            },
+            {
+              text: `Analyze this medical image of ${type} using your visual diagnostic capabilities.`
+            }
+          ]
+        },
         config: {
           systemInstruction: SYSTEM_PROMPT_ENHANCEMENT,
           responseMimeType: 'application/json',
@@ -147,7 +144,11 @@ export default function Dashboard() {
         }
       });
 
-      const analysis = JSON.parse(response.text || '{}') as AnalysisResult;
+      const text = response.text;
+      if (!text) {
+        throw new Error('The AI model returned an empty response. Please try with a clearer image.');
+      }
+      const analysis = JSON.parse(text) as AnalysisResult;
 
       if (!analysis.predicted_disease) {
         throw new Error('The AI model could not identify a condition. Please provide a clearer image.');

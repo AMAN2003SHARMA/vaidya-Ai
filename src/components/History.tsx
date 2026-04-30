@@ -11,7 +11,10 @@ import {
   FileText,
   Clock,
   ArrowUpRight,
-  TrendingUp
+  TrendingUp,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -61,6 +64,10 @@ interface DiagnosticRecord {
   imageUrl: string;
   predictedDisease: string;
   severityPercentage: number;
+  confidenceScore: number;
+  visualMarkers: string[];
+  differentialDiagnosis: string[];
+  suggestedTests: string[];
   timestamp: Timestamp;
   precautions: string[];
   causes: string[];
@@ -295,7 +302,7 @@ export default function History() {
                   </div>
                 </div>
                 <div className="p-6 space-y-6">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
                         <Activity className="w-5 h-5 text-red-500" />
@@ -307,11 +314,11 @@ export default function History() {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                        <Clock className="w-5 h-5 text-indigo-500" />
+                        <Sparkles className="w-5 h-5 text-indigo-500" />
                       </div>
                       <div>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase">Date</p>
-                        <p className="text-lg font-bold text-gray-900">{selectedRecord.timestamp.toDate().toLocaleDateString()}</p>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase">Confidence</p>
+                        <p className="text-lg font-bold text-gray-900">{selectedRecord.confidenceScore || 0}%</p>
                       </div>
                     </div>
                   </div>
@@ -319,12 +326,12 @@ export default function History() {
                   <div className="space-y-4">
                     <h4 className="font-bold text-gray-900 flex items-center gap-2">
                       <ArrowUpRight className="w-4 h-4 text-indigo-500" />
-                      Precautions Taken
+                      Visual Markers
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      {selectedRecord.precautions.map((p, i) => (
-                        <span key={i} className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-medium">
-                          {p}
+                      {selectedRecord.visualMarkers?.map((m, i) => (
+                        <span key={i} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-[10px] font-bold border border-gray-200">
+                          {m}
                         </span>
                       ))}
                     </div>
@@ -332,16 +339,60 @@ export default function History() {
 
                   <div className="space-y-4">
                     <h4 className="font-bold text-gray-900 flex items-center gap-2">
-                      <ArrowUpRight className="w-4 h-4 text-indigo-500" />
-                      Identified Causes
+                      <ArrowUpRight className="w-4 h-4 text-purple-500" />
+                      Differential Diagnosis
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      {selectedRecord.causes.map((c, i) => (
-                        <span key={i} className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">
-                          {c}
+                      {selectedRecord.differentialDiagnosis?.map((d, i) => (
+                        <span key={i} className="px-2 py-1 bg-purple-50 text-purple-700 rounded text-[10px] font-bold border border-purple-100">
+                          {d}
                         </span>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="font-bold text-gray-900 flex items-center gap-2">
+                      <ArrowUpRight className="w-4 h-4 text-blue-500" />
+                      Suggested Tests
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedRecord.suggestedTests?.map((t, i) => (
+                        <span key={i} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-[10px] font-bold border border-blue-100">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="font-bold text-gray-900 flex items-center gap-2 text-green-600">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Precautions
+                    </h4>
+                    <ul className="space-y-1">
+                      {selectedRecord.precautions.map((p, i) => (
+                        <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                          <ChevronRight className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                          {p}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="font-bold text-gray-900 flex items-center gap-2 text-amber-600">
+                      <AlertCircle className="w-4 h-4" />
+                      Possible Causes
+                    </h4>
+                    <ul className="space-y-1">
+                      {selectedRecord.causes.map((c, i) => (
+                        <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
+                          <ChevronRight className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+                          {c}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               </motion.div>
