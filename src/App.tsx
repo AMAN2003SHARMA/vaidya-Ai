@@ -14,6 +14,7 @@ import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
 import History from './components/History';
 import MapLocator from './components/MapLocator';
+import Chatbot from './components/Chatbot';
 import Profile from './components/Profile';
 import { 
   LayoutDashboard, 
@@ -195,6 +196,8 @@ export default function App() {
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </main>
+
+          {user && <Chatbot />}
           
           <footer className="bg-white border-t border-gray-200 py-6 mt-auto">
             <div className="max-w-7xl mx-auto px-4 text-center">

@@ -98,7 +98,7 @@ export default function Dashboard() {
       }
       const ai = new GoogleGenAI({ apiKey });
       const base64Data = image.split(',')[1];
-      const model = 'gemini-1.5-flash';
+      const model = 'gemini-3-flash-preview';
       
       const response = await ai.models.generateContent({
         model,
@@ -180,11 +180,7 @@ export default function Dashboard() {
       }
     } catch (err: any) {
       console.error(err);
-      if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED')) {
-        setError('The AI service is currently at its usage limit. Please wait a few minutes and try again.');
-      } else {
-        setError('Failed to analyze image. Please try again with a clearer photo.');
-      }
+      setError('Failed to analyze image. Please try again with a clearer photo.');
     } finally {
       setLoading(false);
     }

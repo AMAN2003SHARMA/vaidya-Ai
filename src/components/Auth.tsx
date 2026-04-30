@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
+  signInWithPopup,
   updateProfile
 } from 'firebase/auth';
-import { auth, db } from '../firebase';
+import { auth, db, googleProvider } from '../firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, User, Chrome, ArrowRight, ShieldCheck } from 'lucide-react';
 
 enum OperationType {
   CREATE = 'create',
@@ -81,6 +82,38 @@ export default function Auth() {
         setError('Domain Not Authorized: Please add "vaidyaaibyamk17.netlify.app" to Authorized Domains in your Firebase Console (Authentication > Settings).');
       } else if (err.code === 'auth/operation-not-allowed') {
         setError('Sign-in Disabled: Please enable Email/Password in your Firebase Console (Authentication > Sign-in method).');
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      // Update/Create profile
+      const userPath = `users/${result.user.uid}`;
+      try {
+        await setDoc(doc(db, 'users', result.user.uid), {
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName: result.user.displayName,
+          photoURL: result.user.photoURL,
+          twoFactorEnabled: false, // Default for social login
+          createdAt: serverTimestamp()
+        }, { merge: true });
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, userPath);
+      }
+    } catch (err: any) {
+      if (err.code === 'auth/unauthorized-domain') {
+        setError('Domain Not Authorized: Please add "vaidyaaibyamk17.netlify.app" to Authorized Domains in your Firebase Console (Authentication > Settings).');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('Sign-in Disabled: Please enable Google in your Firebase Console (Authentication > Sign-in method).');
       } else {
         setError(err.message);
       }
@@ -174,6 +207,24 @@ export default function Auth() {
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
           </form>
+
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-3 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all font-medium text-gray-700"
+          >
+            <Chrome className="w-5 h-5 text-blue-500" />
+            Google Account
+          </button>
 
           <p className="mt-8 text-center text-gray-600">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
