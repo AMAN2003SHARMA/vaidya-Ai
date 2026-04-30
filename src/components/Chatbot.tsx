@@ -13,7 +13,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { SYSTEM_PROMPT_ENHANCEMENT } from '../constants';
-import { SYSTEM_PROMPT_ENHANCEMENT } from '../constants';
 
 interface Message {
   role: 'user' | 'bot';
@@ -56,7 +55,7 @@ export default function Chatbot() {
       }
       const ai = new GoogleGenAI({ apiKey });
       const chat = ai.chats.create({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-2.0-flash',
         config: {
           systemInstruction: `You are 'Indian Medical', a helpful, culturally aware medical AI assistant. 
           

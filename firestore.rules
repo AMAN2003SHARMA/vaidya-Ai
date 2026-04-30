@@ -30,7 +30,7 @@ service cloud.firestore {
     }
 
     function isValidDiagnostic(data) {
-      return data.keys().hasAll(['uid', 'type', 'imageUrl', 'predictedDisease', 'severityPercentage', 'confidenceScore', 'visualMarkers', 'timestamp']) &&
+      return data.keys().hasAll(['uid', 'type', 'imageUrl', 'predictedDisease', 'severityPercentage', 'confidenceScore', 'visualMarkers', 'differentialDiagnosis', 'suggestedTests', 'timestamp']) &&
              data.uid == request.auth.uid &&
              data.type in ['Skin', 'Eyes', 'Teeth'] &&
              isValidUrl(data.imageUrl) &&
@@ -38,7 +38,9 @@ service cloud.firestore {
              data.severityPercentage >= 0 && data.severityPercentage <= 100 &&
              data.confidenceScore is number &&
              data.confidenceScore >= 0 && data.confidenceScore <= 100 &&
-             data.visualMarkers is list;
+             data.visualMarkers is list &&
+             data.differentialDiagnosis is list &&
+             data.suggestedTests is list;
     }
 
     // ===============================================================

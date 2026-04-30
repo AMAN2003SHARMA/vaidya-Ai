@@ -26,11 +26,13 @@
         "severityPercentage": { "type": "number" },
         "confidenceScore": { "type": "number" },
         "visualMarkers": { "type": "array", "items": { "type": "string" } },
+        "differentialDiagnosis": { "type": "array", "items": { "type": "string" } },
+        "suggestedTests": { "type": "array", "items": { "type": "string" } },
         "precautions": { "type": "array", "items": { "type": "string" } },
         "causes": { "type": "array", "items": { "type": "string" } },
         "timestamp": { "type": "string", "format": "date-time" }
       },
-      "required": ["uid", "type", "imageUrl", "predictedDisease", "severityPercentage", "confidenceScore", "visualMarkers", "timestamp"]
+      "required": ["uid", "type", "imageUrl", "predictedDisease", "severityPercentage", "confidenceScore", "visualMarkers", "differentialDiagnosis", "suggestedTests", "timestamp"]
     }
   },
   "firestore": {

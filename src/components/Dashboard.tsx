@@ -54,6 +54,8 @@ interface AnalysisResult {
   severity_percentage: number;
   confidence_score: number;
   visual_markers: string[];
+  differential_diagnosis: string[];
+  suggested_tests: string[];
   precautions: string[];
   causes: string[];
 }
@@ -96,34 +98,29 @@ export default function Dashboard() {
       }
       const ai = new GoogleGenAI({ apiKey });
       const base64Data = image.split(',')[1];
-      const model = 'gemini-3.1-pro-preview';
+      const model = 'gemini-2.0-flash';
       
       const response = await ai.models.generateContent({
         model,
-        contents: {
-          parts: [
-            {
-              inlineData: {
-                mimeType: 'image/jpeg',
-                data: base64Data
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                inlineData: {
+                  mimeType: 'image/jpeg',
+                  data: base64Data
+                }
+              },
+              {
+                text: `Analyze this medical image of ${type} using your visual diagnostic capabilities.`
               }
-            },
-            {
-              text: `Analyze this medical image of ${type}. 
-              
-              ${SYSTEM_PROMPT_ENHANCEMENT}
-              
-              Return a JSON object with: predicted_disease (string), severity_percentage (number 0-100), confidence_score (number 0-100), visual_markers (array of strings), precautions (array of strings), and causes (array of strings). 
-              
-              Be professional, accurate, and cross-reference with live medical research using Google Search.
-              
-              IMPORTANT: Return ONLY the JSON object, no other text.`
-            }
-          ]
-        },
+            ]
+          }
+        ],
         config: {
+          systemInstruction: SYSTEM_PROMPT_ENHANCEMENT,
           responseMimeType: 'application/json',
-          tools: [{ googleSearch: {} }],
           responseSchema: {
             type: Type.OBJECT,
             properties: {
@@ -131,26 +128,26 @@ export default function Dashboard() {
               severity_percentage: { type: Type.NUMBER },
               confidence_score: { type: Type.NUMBER },
               visual_markers: { type: Type.ARRAY, items: { type: Type.STRING } },
+              differential_diagnosis: { type: Type.ARRAY, items: { type: Type.STRING } },
+              suggested_tests: { type: Type.ARRAY, items: { type: Type.STRING } },
               precautions: { type: Type.ARRAY, items: { type: Type.STRING } },
               causes: { type: Type.ARRAY, items: { type: Type.STRING } }
             },
-            required: ['predicted_disease', 'severity_percentage', 'confidence_score', 'visual_markers', 'precautions', 'causes']
+            required: [
+              'predicted_disease', 
+              'severity_percentage', 
+              'confidence_score', 
+              'visual_markers', 
+              'differential_diagnosis', 
+              'suggested_tests', 
+              'precautions', 
+              'causes'
+            ]
           }
         }
       });
 
-      const text = response.text || '';
-      let analysis: AnalysisResult;
-      
-      try {
-        // Try to find JSON in the response text if it's not pure JSON
-        const jsonMatch = text.match(/\{[\s\S]*\}/);
-        const jsonStr = jsonMatch ? jsonMatch[0] : text;
-        analysis = JSON.parse(jsonStr) as AnalysisResult;
-      } catch (parseErr) {
-        console.error('Failed to parse AI response:', text);
-        throw new Error('The AI model returned an invalid response format. Please try again.');
-      }
+      const analysis = JSON.parse(response.text || '{}') as AnalysisResult;
 
       if (!analysis.predicted_disease) {
         throw new Error('The AI model could not identify a condition. Please provide a clearer image.');
@@ -170,6 +167,8 @@ export default function Dashboard() {
             severityPercentage: analysis.severity_percentage,
             confidenceScore: analysis.confidence_score,
             visualMarkers: analysis.visual_markers,
+            differentialDiagnosis: analysis.differential_diagnosis,
+            suggestedTests: analysis.suggested_tests,
             precautions: analysis.precautions,
             causes: analysis.causes,
             timestamp: serverTimestamp()
@@ -322,7 +321,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="space-y-4">
                   <h3 className="flex items-center gap-2 font-bold text-gray-900">
                     <Activity className="w-5 h-5 text-indigo-500" />
@@ -332,6 +331,32 @@ export default function Dashboard() {
                     {result.visual_markers.map((marker, i) => (
                       <span key={i} className="px-2 py-1 bg-gray-100 text-gray-700 text-[10px] font-bold rounded-md border border-gray-200">
                         {marker}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="flex items-center gap-2 font-bold text-gray-900">
+                    <Info className="w-5 h-5 text-purple-500" />
+                    Differential Diagnosis
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {result.differential_diagnosis.map((diff, i) => (
+                      <span key={i} className="px-2 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-md border border-purple-100">
+                        {diff}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="flex items-center gap-2 font-bold text-gray-900">
+                    <Activity className="w-5 h-5 text-blue-500" />
+                    Suggested Tests
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {result.suggested_tests.map((test, i) => (
+                      <span key={i} className="px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-md border border-blue-100">
+                        {test}
                       </span>
                     ))}
                   </div>
@@ -350,6 +375,9 @@ export default function Dashboard() {
                     ))}
                   </ul>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <h3 className="flex items-center gap-2 font-bold text-gray-900">
                     <CheckCircle2 className="w-5 h-5 text-green-500" />

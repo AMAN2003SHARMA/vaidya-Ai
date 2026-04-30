@@ -133,6 +133,45 @@ const MOCK_DOCTORS = [
     phone: "+91 44 2345 6789",
     distance: "350 km",
     open: "Open until 8:00 PM"
+  },
+  {
+    id: 11,
+    name: "Dr. Meera Kulkarni",
+    specialty: "Dermatologist",
+    expertise: ["Skin", "Psoriasis", "Eczema"],
+    address: "Kothrud, Pune, Maharashtra",
+    city: "Pune",
+    rating: 4.9,
+    reviews: 188,
+    phone: "+91 20 2345 6789",
+    distance: "840 km",
+    open: "Open until 7:00 PM"
+  },
+  {
+    id: 12,
+    name: "Dr. Arvind Patel",
+    specialty: "Ophthalmologist",
+    expertise: ["Eyes", "Retina", "Glaucoma"],
+    address: "Navrangpura, Ahmedabad, Gujarat",
+    city: "Ahmedabad",
+    rating: 4.7,
+    reviews: 312,
+    phone: "+91 79 2345 6789",
+    distance: "1200 km",
+    open: "Open until 6:00 PM"
+  },
+  {
+    id: 13,
+    name: "Dr. Shalini Singh",
+    specialty: "Dentist",
+    expertise: ["Teeth", "Oral Surgery", "Braces"],
+    address: "Gomti Nagar, Lucknow, Uttar Pradesh",
+    city: "Lucknow",
+    rating: 4.8,
+    reviews: 145,
+    phone: "+91 522 2345 678",
+    distance: "1700 km",
+    open: "Open until 8:00 PM"
   }
 ];
 
