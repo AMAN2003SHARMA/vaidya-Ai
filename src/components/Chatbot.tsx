@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { SYSTEM_PROMPT_ENHANCEMENT } from '../constants';
+import { SYSTEM_PROMPT_ENHANCEMENT } from '../constants';
 
 interface Message {
   role: 'user' | 'bot';
